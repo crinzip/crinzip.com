@@ -395,7 +395,22 @@
         let animFrame = null;
 
         widget.bind(SC.Widget.Events.READY, function () {
-            widget.setVolume(50);
+            widget.setVolume(0);
+
+            let hasFadedIn = false;
+            widget.bind(SC.Widget.Events.PLAY, function fadeIn() {
+                if (hasFadedIn) return;
+                hasFadedIn = true;
+                let vol = 0;
+                const fadeInterval = setInterval(function () {
+                    vol += 2;
+                    if (vol >= 10) {
+                        vol = 10;
+                        clearInterval(fadeInterval);
+                    }
+                    widget.setVolume(vol);
+                }, 50);
+            });
 
             widget.getCurrentSound(function (sound) {
                 if (sound && sound.title) {
