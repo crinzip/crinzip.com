@@ -4,483 +4,1290 @@
 <!---->
 <!--
         In a snooping-around-kinda mood today, aren't we?
+        But, since you're here.. try double-clicking the screen.
 -->
 <!---->
 <!---->
 <!---->
-<!---->
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-    <link rel="icon" type="image/x-icon" href="src/assets/favicon.ico">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
-    <title>crinzip</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>crinzip</title>
 
-        body {
-            background: #0e0e0e;
-            color: #fff;
-            font-family: 'Inter', sans-serif;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            overflow: hidden;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-            position: relative;
-        }
+<link rel="icon" type="image/x-icon" href="src/assets/favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/js-yaml@4/dist/js-yaml.min.js"></script>
 
-        .center-content {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 6px;
-        }
+<style>
+  :root{
+    --paper:#ffffff;
+    --ink:#111111;
+    --muted:#8a8a8a;
+    --fill:#f4f4f2;
+    --hover:#ededeb;
+    --accent:#111111;
+    --gap:14px;
+    --cell:128px;
+    --sans:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;
+  }
 
-        .name {
-            font-size: 32px;
-            letter-spacing: -0.64px;
-            white-space: nowrap;
-        }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--sans);
+    -webkit-font-smoothing:antialiased;
+    padding:40px clamp(18px,5vw,72px) 80px;
+    font-size:14px;
+    line-height:1.5;
+  }
 
-        .name .bold {
-            font-weight: 700;
-        }
+  a{color:inherit;text-decoration:none}
 
-        .name .medium {
-            font-weight: 500;
-        }
+  header{
+    display:flex;align-items:baseline;justify-content:space-between;
+    margin-bottom:48px;
+  }
+  .vibe-draggable{
+    position:relative;
+    transform:
+      translate(
+        calc(var(--vibe-pan-x, 0px) + var(--vibe-x, 0px)),
+        calc(var(--vibe-pan-y, 0px) + var(--vibe-y, 0px))
+      )
+      rotate(var(--vibe-rotate, 0deg))
+      skew(var(--vibe-skew-x, 0deg), var(--vibe-skew-y, 0deg))
+      scale(var(--vibe-scale, 1));
+    transform-origin:center;
+    transition:box-shadow .18s ease, transform .18s ease;
+    touch-action:manipulation;
+  }
+  body.vibe-mode .vibe-draggable{
+    cursor:grab;
+    touch-action:none;
+  }
+  body.vibe-mode.vibe-panning,
+  body.vibe-mode.vibe-panning .vibe-draggable,
+  body.vibe-mode.vibe-panning .vibe-draggable *{cursor:move}
+  body.vibe-mode .vibe-draggable a,
+  body.vibe-mode .vibe-draggable button{cursor:pointer}
+  body.vibe-mode .vibe-draggable .cell{cursor:grab}
+  body.vibe-mode .vibe-draggable img{
+    pointer-events:none;
+    user-select:none;
+    -webkit-user-drag:none;
+  }
+  body.vibe-mode .vibe-draggable.vibe-dragging{
+    z-index:45;
+    cursor:grabbing;
+    --vibe-scale:1.055;
+    box-shadow:0 14px 34px rgba(0,0,0,.14);
+    transition:box-shadow .18s ease, transform 40ms linear;
+  }
+  body.vibe-mode .vibe-draggable.vibe-dragging a,
+  body.vibe-mode .vibe-draggable.vibe-dragging button,
+  body.vibe-mode .vibe-draggable.vibe-dragging .cell{cursor:grabbing}
+  .wordmark{font-size:16px;font-weight:600;letter-spacing:0}
+  header .right{color:var(--muted);font-size:13px}
+  header .right a:hover{color:var(--ink)}
 
-        .contact {
-            font-size: 21px;
-            color: #f1f1f1;
-            letter-spacing: -0.84px;
-            white-space: nowrap;
-            font-weight: 400;
-        }
+  .section{margin-bottom:0}
 
-        .music-player {
-            position: absolute;
-            bottom: 80px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 200px;
-            height: 51px;
-            background: rgba(17, 17, 17, 0.2);
-            border: 1px solid #171717;
-            border-radius: 14px;
-            box-shadow: 0 0 20px 0 rgba(30, 30, 30, 0.08);
-            display: flex;
-            align-items: center;
-            padding: 0 18px;
-            gap: 12px;
-            cursor: pointer;
-            user-select: none;
-            transition: border-color 0.3s ease;
-            z-index: 10;
-        }
+  .grid{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:flex-start;
+    gap:var(--gap);
+  }
+  .item{
+    width:var(--cell);
+    flex:0 0 var(--cell);
+    display:flex;flex-direction:column;
+  }
+  .item .lab{
+    height:18px;line-height:18px;margin-bottom:8px;
+    font-size:12px;font-weight:600;letter-spacing:.04em;white-space:nowrap;
+  }
+  .item .lab.empty{visibility:hidden}
+  .item .lab .count{color:var(--muted);font-weight:400;margin-left:5px}
 
-        .music-player:hover {
-            border-color: #1e1e1e;
-        }
+  .cell{
+    cursor:pointer;
+    display:block;width:100%;
+    border:0;background:none;padding:0;text-align:left;
+    font:inherit;color:inherit;
+  }
+  .thumb{
+    width:100%;aspect-ratio:1/1;
+    background:var(--fill);
+    border-radius:6px;
+    overflow:hidden;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+  .thumb .ph{
+    font-size:12px;color:var(--muted);
+    padding:0 8px;text-align:center;word-break:break-word;
+  }
+  .cell:hover .thumb{background:var(--hover)}
+  .cell:focus-visible{outline:none}
+  .cell:focus-visible .thumb{outline:2px solid var(--ink);outline-offset:2px}
 
-        .play-btn {
-            width: 12px;
-            height: 12px;
-            flex-shrink: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+  .cap{
+    margin-top:8px;font-size:13px;color:var(--ink);
+    display:flex;align-items:center;gap:5px;
+  }
+  .cap .play{font-size:9px;color:var(--muted)}
 
-        .play-btn .icon-stop {
-            width: 10px;
-            height: 10px;
-            background: #222;
-            display: block;
-        }
+  @media(max-width:900px){
+    :root{--gap:16px}
+    .item{
+      width:calc((100% - (var(--gap) * 2)) / 3);
+      flex-basis:calc((100% - (var(--gap) * 2)) / 3);
+    }
+    .item .lab{height:20px;line-height:20px;font-size:13px;margin-bottom:9px}
+    .cap{font-size:14px;margin-top:9px}
+    .thumb .ph{font-size:13px}
+  }
 
-        .play-btn .icon-play {
-            width: 0;
-            height: 0;
-            border-style: solid;
-            border-width: 6px 0 6px 10px;
-            border-color: transparent transparent transparent #222;
-            display: block;
-        }
+  @media(max-width:560px){
+    body{padding:32px 18px 72px}
+    :root{--gap:14px}
+    header{margin-bottom:36px}
+    .item{
+      width:calc((100% - var(--gap)) / 2);
+      flex-basis:calc((100% - var(--gap)) / 2);
+    }
+    .item .lab{height:20px;line-height:20px;font-size:13px;margin-bottom:8px}
+    .cap{font-size:14px}
+  }
 
-        .player-text {
-            display: flex;
-            flex-direction: column;
-            gap: 3px;
-            min-width: 0;
-        }
+  #product{display:none}
+  body.view-product #grid-root{display:none}
+  body.view-product #product{display:block}
 
-        .player-label {
-            font-size: 12px;
-            font-weight: 400;
-            letter-spacing: -0.24px;
-            color: #222;
-            line-height: 1;
-        }
+  .back{
+    font-size:13px;color:var(--muted);
+    display:inline-flex;gap:7px;align-items:center;margin-bottom:34px;cursor:pointer;
+    border:0;background:none;font-family:inherit;padding:0;
+  }
+  .back:hover{color:var(--ink)}
 
-        .player-title {
-            font-size: 12px;
-            font-weight: 700;
-            letter-spacing: -0.24px;
-            color: #222;
-            line-height: 1;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
+  .product-wrap{display:grid;grid-template-columns:180px minmax(0,1fr);gap:clamp(24px,5vw,56px);align-items:start}
+  @media(max-width:680px){.product-wrap{grid-template-columns:1fr;gap:24px}.product-img{max-width:180px}}
 
-        .audio-reactive-blur {
-            position: absolute;
-            bottom: -80px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 600px;
-            height: 200px;
-            border-radius: 50%;
-            background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 40%, transparent 70%);
-            filter: blur(40px);
-            opacity: 0;
-            transition: opacity 0.6s ease;
-            pointer-events: none;
-        }
+  .product-img{
+    width:100%;max-width:180px;aspect-ratio:1/1;background:var(--fill);border-radius:10px;overflow:hidden;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .product-img img{width:100%;height:100%;object-fit:cover}
+  .product-img .ph{color:var(--muted);font-size:13px}
 
-        .audio-reactive-blur.active {
-            opacity: 1;
-        }
+  .product-meta .tag{
+    font-size:12px;color:var(--muted);
+    margin-bottom:14px;
+  }
+  .product-meta h1{
+    font-weight:600;font-size:30px;line-height:1.15;
+    letter-spacing:0;margin:0 0 18px;
+  }
+  .product-meta p{
+    font-size:15px;line-height:1.6;color:#333;
+    margin:0 0 22px;max-width:42ch;
+  }
+  .btn{
+    display:inline-flex;align-items:baseline;gap:5px;
+    color:var(--accent);
+    padding:0;
+    border-radius:0;
+    font-size:14px;font-weight:600;
+    cursor:pointer;
+  }
+  .btn:hover{text-decoration:underline;text-underline-offset:3px}
+  .btn:focus-visible{outline:2px solid var(--ink);outline-offset:4px}
 
-        #dvdCanvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 5;
-            filter: blur(1.5px);
-            pointer-events: none;
-        }
+  #modal{
+    position:fixed;inset:0;display:none;
+    align-items:center;justify-content:center;
+    background:rgba(10,10,10,.8);
+    padding:24px;z-index:50;
+  }
+  body.view-modal #modal{display:flex}
+  .modal-box{width:min(880px,100%)}
+  .modal-top{
+    display:flex;justify-content:space-between;align-items:center;
+    margin-bottom:10px;color:#eee;
+  }
+  .modal-top span{font-size:13px}
+  .modal-actions{display:flex;align-items:center;gap:12px}
+  .modal-direct{
+    color:#eee;font-size:13px;text-decoration:none;
+    display:none;
+  }
+  .modal-direct:hover{text-decoration:underline;text-underline-offset:3px;color:#fff}
+  .modal-direct:focus-visible{outline:2px solid #fff;outline-offset:2px}
+  .modal-close{
+    border:0;background:none;color:#eee;cursor:pointer;
+    font-family:inherit;font-size:13px;padding:4px 6px;
+  }
+  .modal-close:hover{color:#fff}
+  .modal-close:focus-visible{outline:2px solid #fff;outline-offset:2px}
+  .modal-video{
+    position:relative;width:100%;aspect-ratio:16/9;
+    background:#000;border-radius:8px;overflow:hidden;
+  }
+  .modal-video iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
 
-        .sc-widget {
-            position: absolute;
-            width: 0;
-            height: 0;
-            overflow: hidden;
-            pointer-events: none;
-        }
+  #subscribeModal{
+    position:fixed;
+    inset:0;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    background:rgba(10,10,10,.28);
+    padding:24px;
+    z-index:55;
+  }
+  body.view-subscribe #subscribeModal{display:flex}
+  .subscribe-box{
+    width:min(380px,100%);
+    border:1px solid #dededb;
+    border-radius:8px;
+    background:#fff;
+    color:var(--ink);
+    box-shadow:0 18px 54px rgba(0,0,0,.12);
+    padding:22px;
+    animation:subscribeIn .37s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  @keyframes subscribeIn{
+    0%{transform:scale(1.25)}
+    100%{transform:scale(1)}
+  }
+  .subscribe-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:14px;
+    margin-bottom:18px;
+  }
+  .subscribe-title{font-size:13px;font-weight:600}
+  .subscribe-close{
+    border:0;
+    background:none;
+    color:var(--muted);
+    cursor:pointer;
+    font:inherit;
+    font-size:18px;
+    line-height:1;
+    padding:0;
+  }
+  .subscribe-close:hover{color:var(--ink)}
+  .subscribe-copy{
+    margin:0 0 16px;
+    color:#333;
+    font-size:14px;
+    line-height:1.5;
+  }
+  .subscribe-form{display:flex;gap:14px}
+  .subscribe-input{
+    flex:1;
+    min-width:0;
+    border:1px solid #dededb;
+    border-radius:6px;
+    background:#fff;
+    color:var(--ink);
+    font:inherit;
+    font-size:13px;
+    padding:9px 10px;
+  }
+  .subscribe-input:focus{outline:2px solid var(--ink);outline-offset:2px}
+  .subscribe-submit{
+    border:0;
+    background:none;
+    color:var(--ink);
+    cursor:pointer;
+    font:inherit;
+    font-size:13px;
+    font-weight:600;
+    padding:9px 2px;
+    white-space:nowrap;
+  }
+  .subscribe-submit:hover{text-decoration:underline;text-underline-offset:3px}
+  .subscribe-status{
+    min-height:18px;
+    margin-top:10px;
+    color:var(--muted);
+    font-size:12px;
+  }
+  @media(max-width:560px){
+    .subscribe-form{flex-direction:column}
+    .subscribe-submit{align-self:flex-start}
+  }
 
-        @media (max-width: 600px) {
-            .center-content {
-                align-items: center;
-                gap: 6px;
-                text-align: center;
-            }
+  .music-player{
+    position:fixed;
+    left:50%;
+    bottom:24px;
+    width:min(260px,calc(100vw - 36px));
+    min-height:54px;
+    transform:translate(
+      calc(-50% + var(--vibe-pan-x, 0px) + var(--vibe-x, 0px)),
+      calc(100% + 40px + var(--vibe-pan-y, 0px) + var(--vibe-y, 0px))
+    ) scale(var(--vibe-scale, 1));
+    opacity:0;
+    pointer-events:none;
+    z-index:60;
+    border:1px solid #dededb;
+    border-radius:8px;
+    background:rgba(255,255,255,.92);
+    color:var(--ink);
+    box-shadow:0 12px 34px rgba(0,0,0,.08);
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:10px 13px;
+    font:inherit;
+    text-align:left;
+    transition:transform .85s ease, opacity .5s ease, border-color .5s ease;
+  }
+  .music-player.active{
+    transform:translate(
+      calc(-50% + var(--vibe-pan-x, 0px) + var(--vibe-x, 0px)),
+      calc(var(--vibe-pan-y, 0px) + var(--vibe-y, 0px))
+    ) scale(var(--vibe-scale, 1));
+    opacity:1;
+    pointer-events:auto;
+  }
+  .music-player:hover{border-color:#c7c7c3}
+  .play-btn{
+    width:18px;
+    height:18px;
+    flex:0 0 18px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border:0;
+    background:none;
+    padding:0;
+    color:inherit;
+    cursor:pointer;
+    font:inherit;
+  }
+  .play-btn:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+  .play-btn .icon-stop{
+    width:10px;
+    height:10px;
+    background:var(--ink);
+    display:block;
+  }
+  .play-btn .icon-play{
+    width:0;
+    height:0;
+    border-style:solid;
+    border-width:6px 0 6px 10px;
+    border-color:transparent transparent transparent var(--ink);
+    display:block;
+  }
+  .player-text{min-width:0;display:flex;flex-direction:column;gap:2px}
+  .player-label{font-size:11px;color:var(--muted);line-height:1.1}
+  .player-title{
+    font-size:12px;
+    font-weight:600;
+    line-height:1.2;
+    color:inherit;
+    text-decoration:none;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .player-title:hover{text-decoration:underline;text-underline-offset:3px}
+  .player-title:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+  .sc-widget{
+    position:absolute;
+    width:0;
+    height:0;
+    overflow:hidden;
+    pointer-events:none;
+  }
+  .hidden-frame{
+    position:absolute;
+    width:1px;
+    height:1px;
+    opacity:0;
+    pointer-events:none;
+    border:0;
+    clip-path:inset(50%);
+  }
 
-            .name {
-                font-size: 28px;
-            }
+  #dvdCanvas{
+    position:fixed;
+    inset:0;
+    width:100%;
+    height:100%;
+    z-index:2147483647;
+    pointer-events:none;
+  }
 
-            .contact {
-                font-size: 16px;
-            }
-
-            .music-player {
-                bottom: 60px;
-            }
-        }
-    </style>
+  footer{
+    margin-top:64px;
+    color:var(--muted);
+    font-size:13px;
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:18px;
+  }
+  .footer-link{
+    display:inline-flex;
+    align-items:baseline;
+    gap:5px;
+    color:var(--ink);
+    font-weight:600;
+    white-space:nowrap;
+    transition:opacity .5s ease;
+  }
+  .footer-action.show-popover .footer-link{opacity:.35}
+  .footer-link:hover{text-decoration:underline;text-underline-offset:3px}
+  .footer-link:focus-visible{outline:2px solid var(--ink);outline-offset:4px}
+  footer a:hover{color:var(--ink)}
+  .footer-action{
+    position:relative;
+    display:inline-flex;
+    justify-content:flex-end;
+  }
+  .footer-popover{
+    position:absolute;
+    right:0;
+    bottom:calc(100% + 10px);
+    transform:translateY(5px);
+    opacity:0;
+    pointer-events:none;
+    border:1px solid #f1f1f1;
+    border-radius:8px;
+    background:rgba(255,255,255,.94);
+    color:var(--ink);
+    padding:8px 10px;
+    font-size:12px;
+    font-weight:500;
+    white-space:nowrap;
+    transition:transform .85s ease, opacity .5s ease, border-color .5s ease;
+  }
+  .footer-action.show-popover .footer-popover{
+    transform:translateY(0);
+    opacity:1;
+  }
+  .load-error{max-width:56ch;color:#333}
+  .load-error strong{display:block;color:var(--ink);margin-bottom:6px}
+</style>
 </head>
 <body>
-    <canvas id="dvdCanvas"></canvas>
+  <canvas id="dvdCanvas" aria-hidden="true"></canvas>
 
-    <div class="center-content">
-        <div class="name">
-            <span class="bold">crin</span><span class="medium">zip</span>
-        </div>
-        <div class="contact">[@ :: patrik at milkpack dot tv]</div>
+  <header class="vibe-draggable">
+    <a class="wordmark" id="wordmark" href="#/">crin.zip</a>
+    <div class="right"><a id="emailList" href="#">email list</a></div>
+  </header>
+
+  <main id="grid-root"></main>
+
+  <section id="product">
+    <button class="back" id="backBtn">&larr; index</button>
+    <div class="product-wrap">
+      <div class="product-img vibe-draggable" id="pImg"></div>
+      <div class="product-meta vibe-draggable">
+        <div class="tag" id="pTag"></div>
+        <h1 id="pTitle"></h1>
+        <p id="pDesc"></p>
+        <a class="btn" id="pBtn" target="_blank" rel="noopener"></a>
+      </div>
     </div>
+  </section>
 
-    <div class="music-player" id="musicPlayer">
-        <div class="play-btn" id="playBtn">
-            <span class="icon-stop" id="playIcon"></span>
+  <footer class="vibe-draggable">
+    <span id="footer"></span>
+    <span class="footer-action" id="footerAction">
+      <span class="footer-popover" id="footerPopover" role="status">soon</span>
+      <a class="footer-link" id="footerLink" href="#">download all ↗</a>
+    </span>
+  </footer>
+
+  <div id="modal" role="dialog" aria-modal="true" aria-label="Tutorial video">
+    <div class="modal-box">
+      <div class="modal-top">
+        <span id="mTitle"></span>
+        <div class="modal-actions">
+          <a class="modal-direct" id="modalDirect" target="_blank" rel="noopener">open directly ↗</a>
+          <button class="modal-close" id="modalClose" aria-label="Close">Close</button>
         </div>
-        <div class="player-text">
-            <span class="player-label" id="playerLabel">Currently playing</span>
-            <span class="player-title" id="playerTitle">Loading...</span>
-        </div>
+      </div>
+      <div class="modal-video" id="mVideo"></div>
     </div>
+  </div>
 
-    <div class="audio-reactive-blur" id="reactiveBlur"></div>
-
-    <div class="sc-widget">
-        <iframe
-            id="scWidget"
-            allow="autoplay"
-            src="https://w.soundcloud.com/player/?url=https%3A%2F%2Fsoundcloud.com%2Faquasine%2F8fc089d9-bd22-4a97-a45d-a8c7d562e9c2&auto_play=true&show_artwork=false&visual=false&origin=null"
-        ></iframe>
+  <div id="subscribeModal" role="dialog" aria-modal="true" aria-label="Email list signup">
+    <div class="subscribe-box">
+      <div class="subscribe-top">
+        <span class="subscribe-title">email list</span>
+        <button class="subscribe-close" id="subscribeClose" type="button" aria-label="Close">&times;</button>
+      </div>
+      <p class="subscribe-copy">get updated when i add new tools/assets</p>
+      <form class="subscribe-form" id="subscribeForm" method="post" target="gumroadSubscribeFrame">
+        <input class="subscribe-input" id="subscribeEmail" name="email" type="email" placeholder="email address" autocomplete="email" required>
+        <input id="subscribeSellerId" name="seller_id" type="hidden">
+        <button class="subscribe-submit" id="subscribeSubmit" type="submit">subscribe ↗</button>
+      </form>
+      <div class="subscribe-status" id="subscribeStatus" aria-live="polite"></div>
     </div>
+  </div>
+  <iframe class="hidden-frame" id="gumroadSubscribeFrame" name="gumroadSubscribeFrame" title="Gumroad subscribe result"></iframe>
 
-    <script type="importmap">
-    {
-        "imports": {
-            "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
-            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
-        }
+  <div class="music-player vibe-draggable" id="musicPlayer">
+    <button class="play-btn" id="playToggle" type="button" aria-label="Stop music">
+      <span class="icon-play" id="playIcon"></span>
+    </button>
+    <span class="player-text">
+      <span class="player-label" id="playerLabel">Click to play</span>
+      <a class="player-title" id="playerTitle" href="https://soundcloud.com/crinzip/sets/crin-zip" target="_blank" rel="noopener">Loading...</a>
+    </span>
+  </div>
+
+  <div class="sc-widget">
+    <iframe
+      id="scWidget"
+      allow="autoplay"
+      src="https://w.soundcloud.com/player/?url=https%3A%2F%2Fsoundcloud.com%2Fcrinzip%2Fsets%2Fcrin-zip&auto_play=false&show_artwork=false&visual=false&origin=null"
+    ></iframe>
+  </div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+  }
+}
+</script>
+<script type="module">
+  import * as THREE from "three";
+  import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+
+  const canvas = document.getElementById("dvdCanvas");
+  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+  const scene = new THREE.Scene();
+  const frustumSize = 10;
+  let aspect = window.innerWidth / window.innerHeight;
+  const camera = new THREE.OrthographicCamera(
+    -frustumSize * aspect / 2,
+    frustumSize * aspect / 2,
+    frustumSize / 2,
+    -frustumSize / 2,
+    0.1,
+    100
+  );
+  camera.position.set(0, 0, 10);
+  camera.lookAt(0, 0, 0);
+
+  scene.add(new THREE.AmbientLight(0xffffff, 0.65));
+  const dirLight = new THREE.DirectionalLight(0xffffff, 0.85);
+  dirLight.position.set(2, 4, 5);
+  scene.add(dirLight);
+
+  let loadedGLTF = null;
+  const loader = new GLTFLoader();
+  loader.load("src/models/crindoggo.glb", function(gltf){
+    loadedGLTF = gltf;
+  });
+
+  const bouncers = [];
+  const modelScale = 0.3;
+  const speed = 1.8;
+  let vibeActive = false;
+  const vibePan = { x:0, y:0, startX:0, startY:0, baseX:0, baseY:0, active:false };
+
+  function screenToWorld(clientX, clientY){
+    const halfW = frustumSize * aspect / 2;
+    const halfH = frustumSize / 2;
+    return {
+      x: (clientX / window.innerWidth) * 2 * halfW - halfW,
+      y: -((clientY / window.innerHeight) * 2 * halfH - halfH)
+    };
+  }
+
+  function spawnModel(worldX, worldY){
+    if(!loadedGLTF) return false;
+
+    const clone = loadedGLTF.scene.clone(true);
+    clone.scale.set(modelScale, modelScale, modelScale);
+    clone.position.set(worldX, worldY, 0);
+    clone.rotation.set(
+      Math.random() * Math.PI * 2,
+      Math.random() * Math.PI * 2,
+      Math.random() * Math.PI * 2
+    );
+
+    scene.add(clone);
+
+    const angle = Math.random() * Math.PI * 2;
+    bouncers.push({
+      model: clone,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed,
+      rotSpeedX: 0.2 + Math.random() * 0.4,
+      rotSpeedY: 0.3 + Math.random() * 0.5,
+      rotSpeedZ: 0.1 + Math.random() * 0.3
+    });
+    return true;
+  }
+
+  function clearVibeModels(){
+    while(bouncers.length){
+      const bouncer = bouncers.pop();
+      scene.remove(bouncer.model);
     }
-    </script>
-    <script type="module">
-        import * as THREE from 'three';
-        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+  }
 
-        const canvas = document.getElementById('dvdCanvas');
-        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-        renderer.setPixelRatio(window.devicePixelRatio);
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.outputColorSpace = THREE.SRGBColorSpace;
+  function isInteractiveClick(target){
+    return Boolean(target.closest(
+      "a, button, input, textarea, select, label, iframe, [role='button'], [role='link'], [contenteditable='true'], #modal, #subscribeModal, #musicPlayer"
+    ));
+  }
 
-        const scene = new THREE.Scene();
+  function enterVibe(e){
+    const world = screenToWorld(e.clientX, e.clientY);
+    if(spawnModel(world.x, world.y)){
+      vibeActive = true;
+      document.body.classList.add("vibe-mode");
+      document.dispatchEvent(new CustomEvent("vibeenter"));
+    }
+  }
 
-        const frustumSize = 10;
-        let aspect = window.innerWidth / window.innerHeight;
-        const camera = new THREE.OrthographicCamera(
-            -frustumSize * aspect / 2, frustumSize * aspect / 2,
-            frustumSize / 2, -frustumSize / 2,
-            0.1, 100
-        );
-        camera.position.set(0, 0, 10);
-        camera.lookAt(0, 0, 0);
+  function exitVibe(){
+    vibeActive = false;
+    document.body.classList.remove("vibe-mode");
+    document.body.classList.remove("vibe-panning");
+    vibePan.x = 0;
+    vibePan.y = 0;
+    vibePan.active = false;
+    document.body.style.removeProperty("--vibe-pan-x");
+    document.body.style.removeProperty("--vibe-pan-y");
+    clearVibeModels();
+    document.dispatchEvent(new CustomEvent("vibeexit"));
+  }
 
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-        scene.add(ambientLight);
-        const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
-        dirLight.position.set(2, 4, 5);
-        scene.add(dirLight);
+  document.addEventListener("dblclick", function(e){
+    if(isInteractiveClick(e.target)) return;
+    if(vibeActive){ exitVibe(); return; }
+    enterVibe(e);
+  });
 
-        let loadedGLTF = null;
-        const loader = new GLTFLoader();
-        loader.load('src/models/crindoggo.glb', function (gltf) {
-            loadedGLTF = gltf;
-        });
+  document.addEventListener("pointerdown", function(e){
+    if(!vibeActive || e.button !== 1) return;
+    if(e.target.closest("#modal, #subscribeModal")) return;
+    e.preventDefault();
+    vibePan.active = true;
+    vibePan.startX = e.clientX;
+    vibePan.startY = e.clientY;
+    vibePan.baseX = vibePan.x;
+    vibePan.baseY = vibePan.y;
+    document.body.classList.add("vibe-panning");
+  });
 
-        const bouncers = [];
-        const modelScale = 0.3;
-        const speed = 1.8;
+  document.addEventListener("pointermove", function(e){
+    if(!vibePan.active) return;
+    e.preventDefault();
+    vibePan.x = vibePan.baseX + e.clientX - vibePan.startX;
+    vibePan.y = vibePan.baseY + e.clientY - vibePan.startY;
+    document.body.style.setProperty("--vibe-pan-x", vibePan.x + "px");
+    document.body.style.setProperty("--vibe-pan-y", vibePan.y + "px");
+  });
 
-        function screenToWorld(clientX, clientY) {
-            const halfW = frustumSize * aspect / 2;
-            const halfH = frustumSize / 2;
-            const x = (clientX / window.innerWidth) * 2 * halfW - halfW;
-            const y = -((clientY / window.innerHeight) * 2 * halfH - halfH);
-            return { x, y };
+  document.addEventListener("pointerup", function(e){
+    if(!vibePan.active) return;
+    e.preventDefault();
+    vibePan.active = false;
+    document.body.classList.remove("vibe-panning");
+  });
+
+  document.addEventListener("auxclick", function(e){
+    if(vibeActive && e.button === 1) e.preventDefault();
+  });
+
+  function getBounds(){
+    const halfW = frustumSize * aspect / 2;
+    const halfH = frustumSize / 2;
+    const margin = modelScale * 0.8;
+    return {
+      minX: -halfW + margin,
+      maxX: halfW - margin,
+      minY: -halfH + margin,
+      maxY: halfH - margin
+    };
+  }
+
+  const clock = new THREE.Clock();
+
+  function animate(){
+    requestAnimationFrame(animate);
+    const delta = clock.getDelta();
+    const bounds = getBounds();
+
+    for(const b of bouncers){
+      b.model.position.x += b.vx * delta;
+      b.model.position.y += b.vy * delta;
+
+      if(b.model.position.x >= bounds.maxX){ b.model.position.x = bounds.maxX; b.vx = -Math.abs(b.vx); }
+      if(b.model.position.x <= bounds.minX){ b.model.position.x = bounds.minX; b.vx = Math.abs(b.vx); }
+      if(b.model.position.y >= bounds.maxY){ b.model.position.y = bounds.maxY; b.vy = -Math.abs(b.vy); }
+      if(b.model.position.y <= bounds.minY){ b.model.position.y = bounds.minY; b.vy = Math.abs(b.vy); }
+
+      b.model.rotation.x += delta * b.rotSpeedX;
+      b.model.rotation.y += delta * b.rotSpeedY;
+      b.model.rotation.z += delta * b.rotSpeedZ;
+    }
+
+    renderer.render(scene, camera);
+  }
+
+  animate();
+
+  window.addEventListener("resize", function(){
+    aspect = window.innerWidth / window.innerHeight;
+    camera.left = -frustumSize * aspect / 2;
+    camera.right = frustumSize * aspect / 2;
+    camera.top = frustumSize / 2;
+    camera.bottom = -frustumSize / 2;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+</script>
+<script src="https://w.soundcloud.com/player/api.js"></script>
+<script>
+  (function(){
+    const player = document.getElementById("musicPlayer");
+    const playToggle = document.getElementById("playToggle");
+    const playIcon = document.getElementById("playIcon");
+    const playerLabel = document.getElementById("playerLabel");
+    const playerTitle = document.getElementById("playerTitle");
+    const widgetFrame = document.getElementById("scWidget");
+
+    if(!player || !playToggle || !widgetFrame || !window.SC) return;
+
+    const widget = SC.Widget(widgetFrame);
+    let widgetReady = false;
+    let pendingPlay = false;
+    let hasFadedIn = false;
+    let lastSoundIndex = -1;
+
+    function setPlayingUi(){
+      player.classList.add("active");
+      playIcon.className = "icon-stop";
+      playerLabel.textContent = "Currently playing";
+    }
+
+    function setPausedUi(label){
+      player.classList.remove("active");
+      playIcon.className = "icon-play";
+      playerLabel.textContent = label || "Click to play";
+    }
+
+    function fadeInOnce(){
+      if(hasFadedIn) return;
+      hasFadedIn = true;
+      let volume = 0;
+      const fade = window.setInterval(function(){
+        volume += 2;
+        if(volume >= 10){
+          volume = 10;
+          window.clearInterval(fade);
         }
+        widget.setVolume(volume);
+      }, 100);
+    }
 
-        function spawnModel(worldX, worldY) {
-            if (!loadedGLTF) return;
-
-            const clone = loadedGLTF.scene.clone(true);
-            clone.scale.set(modelScale, modelScale, modelScale);
-            clone.position.set(worldX, worldY, 0);
-
-            clone.rotation.x = Math.random() * Math.PI * 2;
-            clone.rotation.y = Math.random() * Math.PI * 2;
-            clone.rotation.z = Math.random() * Math.PI * 2;
-
-            scene.add(clone);
-
-            const angle = Math.random() * Math.PI * 2;
-            bouncers.push({
-                model: clone,
-                vx: Math.cos(angle) * speed,
-                vy: Math.sin(angle) * speed,
-                rotSpeedX: 0.2 + Math.random() * 0.4,
-                rotSpeedY: 0.3 + Math.random() * 0.5,
-                rotSpeedZ: 0.1 + Math.random() * 0.3
-            });
+    function updateCurrentSoundTitle(){
+      widget.getCurrentSound(function(sound){
+        if(sound && sound.title){
+          const artist = sound.user ? sound.user.username : "";
+          playerTitle.textContent = artist ? sound.title + " - " + artist : sound.title;
+          if(sound.permalink_url) playerTitle.href = sound.permalink_url;
+        }else{
+          playerTitle.textContent = "crin.zip";
+          playerTitle.href = "https://soundcloud.com/crinzip/sets/crin-zip";
         }
+      });
+    }
 
-        let hasInteracted = false;
-        function tryAutoplay() {
-            if (hasInteracted) return;
-            hasInteracted = true;
-            if (window._scWidget) {
-                window._scWidget.isPaused(function (paused) {
-                    if (paused) window._scWidget.play();
-                });
-            }
+    function playRandomSound(){
+      widget.getSounds(function(sounds){
+        const count = sounds && sounds.length ? sounds.length : 0;
+        let index = 0;
+        if(count > 1){
+          index = Math.floor(Math.random() * count);
+          if(index === lastSoundIndex) index = (index + 1) % count;
+          lastSoundIndex = index;
+          widget.skip(index);
         }
+        window.setTimeout(function(){
+          updateCurrentSoundTitle();
+          widget.play();
+        }, 80);
+      });
+    }
 
-        document.addEventListener('click', function (e) {
-            tryAutoplay();
-            if (e.target.closest('#musicPlayer')) return;
-            const world = screenToWorld(e.clientX, e.clientY);
-            spawnModel(world.x, world.y);
-        });
-        document.addEventListener('keydown', tryAutoplay, { once: true });
+    function revealAndPlay(){
+      player.classList.add("active");
+      playerLabel.textContent = widgetReady ? "Starting" : "Loading";
+      pendingPlay = true;
+      if(widgetReady) playRandomSound();
+    }
 
-        function getBounds() {
-            const halfW = frustumSize * aspect / 2;
-            const halfH = frustumSize / 2;
-            const margin = modelScale * 0.8;
-            return {
-                minX: -halfW + margin,
-                maxX: halfW - margin,
-                minY: -halfH + margin,
-                maxY: halfH - margin
-            };
+    widget.bind(SC.Widget.Events.READY, function(){
+      widgetReady = true;
+      widget.setVolume(0);
+      updateCurrentSoundTitle();
+      if(pendingPlay) playRandomSound();
+    });
+
+    widget.bind(SC.Widget.Events.PLAY, function(){
+      pendingPlay = false;
+      setPlayingUi();
+      updateCurrentSoundTitle();
+      fadeInOnce();
+    });
+
+    widget.bind(SC.Widget.Events.PAUSE, function(){
+      pendingPlay = false;
+      setPausedUi("Paused");
+    });
+
+    widget.bind(SC.Widget.Events.FINISH, function(){
+      pendingPlay = false;
+      playRandomSound();
+    });
+
+    playToggle.addEventListener("click", function(){
+      if(!widgetReady){
+        pendingPlay = false;
+        setPausedUi("Click to play");
+        return;
+      }
+      pendingPlay = false;
+      widget.pause();
+    });
+
+    document.addEventListener("vibeenter", revealAndPlay);
+    document.addEventListener("vibeexit", function(){
+      pendingPlay = false;
+      if(widgetReady) widget.pause();
+      setPausedUi("Click to play");
+    });
+  })();
+</script>
+<script>
+  let CONTENT = { site: {}, sections: [], items: [] };
+  let ITEMS = [];
+  let SECTIONS = [];
+
+  function slugify(value){
+    return String(value || "item")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g,"-")
+      .replace(/(^-|-$)/g,"") || "item";
+  }
+
+  function escapeHtml(value){
+    return String(value || "")
+      .replace(/&/g,"&amp;")
+      .replace(/</g,"&lt;")
+      .replace(/>/g,"&gt;")
+      .replace(/"/g,"&quot;")
+      .replace(/'/g,"&#39;");
+  }
+
+  function normalizeItems(items){
+    const used = {};
+    return (items || []).map(function(item){
+      const it = Object.assign({}, item);
+      const base = slugify(it.id || it.title);
+      used[base] = (used[base] || 0) + 1;
+      it.id = used[base] === 1 ? base : base + "-" + used[base];
+      return it;
+    });
+  }
+
+  function applySiteMeta(){
+    const site = CONTENT.site || {};
+    const title = site.title || "crinzip";
+    const wordmark = site.wordmark || title;
+    const emailListLabel = site.email_list_label || "email list";
+    const emailListUrl = site.email_list_url || "#";
+    const emailListSellerId = site.email_list_seller_id || "";
+    const footer = site.footer || "© {year}";
+    const footerLinkLabel = site.footer_link_label || "download all";
+
+    document.title = title;
+    document.getElementById("wordmark").textContent = wordmark;
+    document.getElementById("emailList").textContent = emailListLabel;
+    document.getElementById("emailList").href = emailListUrl;
+    document.getElementById("subscribeForm").action = gumroadFollowEndpoint(emailListUrl);
+    document.getElementById("subscribeSellerId").value = emailListSellerId;
+    document.getElementById("footer").textContent = footer.replace("{year}", new Date().getFullYear());
+    document.getElementById("footerLink").textContent = footerLinkLabel + " ↗";
+  }
+
+  function gumroadFollowEndpoint(url){
+    return "https://gumroad.com/follow_from_embed_form";
+  }
+
+  function thumbInner(it){
+    if(it.img) return '<img src="'+escapeHtml(it.img)+'" alt="'+escapeHtml(it.title)+'" loading="lazy" draggable="false">';
+    return '<span class="ph">'+escapeHtml(it.caption||it.title)+'</span>';
+  }
+
+  function itemType(it){
+    if(it.type) return it.type;
+    if(it.youtube) return "youtube";
+    return "product";
+  }
+
+  function isProductItem(it){
+    return itemType(it) === "product";
+  }
+
+  function productItems(){
+    return ITEMS.filter(isProductItem);
+  }
+
+  function sectionLabel(id){
+    const section = SECTIONS.find(function(sec){
+      return (typeof sec === "string" ? sec : sec.id) === id;
+    });
+    return typeof section === "string" ? section : ((section && section.label) || id);
+  }
+
+  function renderGrid(){
+    const root = document.getElementById("grid-root");
+    var html = "";
+    SECTIONS.forEach(function(sec){
+      var sectionId = typeof sec === "string" ? sec : sec.id;
+      var sectionLabel = typeof sec === "string" ? sec : (sec.label || sec.id);
+      var items = ITEMS.filter(function(i){return i.section===sectionId;});
+      items.forEach(function(it, idx){
+        var lab = idx===0
+          ? '<div class="lab">'+escapeHtml(sectionLabel)+'<span class="count">'+items.length+'</span></div>'
+          : '<div class="lab empty">&nbsp;</div>';
+        html += '<div class="item vibe-draggable">'
+          + lab
+          + '<button class="cell" data-id="'+escapeHtml(it.id)+'">'
+          +   '<div class="thumb">'+thumbInner(it)+'</div>'
+          +   '<div class="cap">'+(itemType(it)==="youtube"?'<span class="play">\u25B6</span>':"")+escapeHtml(it.caption||it.title)+'</div>'
+          + '</button>'
+          + '</div>';
+      });
+    });
+    root.innerHTML = '<section class="section"><div class="grid">'+html+'</div></section>';
+
+    root.querySelectorAll(".cell").forEach(function(btn){
+      btn.addEventListener("click", function(){ openItem(btn.dataset.id); });
+    });
+    enableVibeDragging(root.querySelectorAll(".vibe-draggable"));
+  }
+
+  function enableVibeDragging(elements){
+    Array.from(elements).forEach(function(item){
+      if(item.dataset.vibeDragReady === "true") return;
+      item.dataset.vibeDragReady = "true";
+      const state = {
+        x:0, y:0, startX:0, startY:0, baseX:0, baseY:0,
+        lastX:0, lastY:0, lastT:0,
+        dragging:false, moved:false, captured:false, clickCellId:"", relaxTimer:null
+      };
+
+      function applyPosition(){
+        item.style.setProperty("--vibe-x", state.x + "px");
+        item.style.setProperty("--vibe-y", state.y + "px");
+      }
+
+      function applyCloth(dx, dy, dt){
+        const speedX = dx / Math.max(dt, 16);
+        const speedY = dy / Math.max(dt, 16);
+        const skewX = Math.max(-7, Math.min(7, speedX * 1.8));
+        const skewY = Math.max(-4, Math.min(4, speedY * -0.9));
+        const rotate = Math.max(-5, Math.min(5, speedX * 1.1));
+        item.style.setProperty("--vibe-skew-x", skewX + "deg");
+        item.style.setProperty("--vibe-skew-y", skewY + "deg");
+        item.style.setProperty("--vibe-rotate", rotate + "deg");
+      }
+
+      function relaxCloth(){
+        item.style.setProperty("--vibe-skew-x", "0deg");
+        item.style.setProperty("--vibe-skew-y", "0deg");
+        item.style.setProperty("--vibe-rotate", "0deg");
+      }
+
+      item.addEventListener("pointerdown", function(e){
+        if(!document.body.classList.contains("vibe-mode")) return;
+        if(e.button !== 0) return;
+        if(e.target.closest("#modal, #subscribeModal")) return;
+        state.startX = e.clientX;
+        state.startY = e.clientY;
+        state.baseX = state.x;
+        state.baseY = state.y;
+        state.lastX = e.clientX;
+        state.lastY = e.clientY;
+        state.lastT = performance.now();
+        state.dragging = true;
+        state.moved = false;
+        state.captured = false;
+        const cell = e.target.closest(".cell") || item.querySelector(".cell");
+        state.clickCellId = cell ? cell.dataset.id : "";
+        if(state.relaxTimer) window.clearTimeout(state.relaxTimer);
+      });
+
+      item.addEventListener("pointermove", function(e){
+        if(!state.dragging) return;
+        const dx = e.clientX - state.startX;
+        const dy = e.clientY - state.startY;
+        if(!state.moved && Math.hypot(dx, dy) < 4) return;
+        e.preventDefault();
+        state.moved = true;
+        if(!state.captured){
+          item.setPointerCapture(e.pointerId);
+          state.captured = true;
         }
+        item.classList.add("vibe-dragging");
+        const now = performance.now();
+        applyCloth(e.clientX - state.lastX, e.clientY - state.lastY, now - state.lastT);
+        state.lastX = e.clientX;
+        state.lastY = e.clientY;
+        state.lastT = now;
+        state.x = state.baseX + dx;
+        state.y = state.baseY + dy;
+        applyPosition();
+      });
 
-        const clock = new THREE.Clock();
-
-        function animate() {
-            requestAnimationFrame(animate);
-            const delta = clock.getDelta();
-            const bounds = getBounds();
-
-            for (const b of bouncers) {
-                b.model.position.x += b.vx * delta;
-                b.model.position.y += b.vy * delta;
-
-                if (b.model.position.x >= bounds.maxX) { b.model.position.x = bounds.maxX; b.vx = -Math.abs(b.vx); }
-                if (b.model.position.x <= bounds.minX) { b.model.position.x = bounds.minX; b.vx = Math.abs(b.vx); }
-                if (b.model.position.y >= bounds.maxY) { b.model.position.y = bounds.maxY; b.vy = -Math.abs(b.vy); }
-                if (b.model.position.y <= bounds.minY) { b.model.position.y = bounds.minY; b.vy = Math.abs(b.vy); }
-
-                b.model.rotation.x += delta * b.rotSpeedX;
-                b.model.rotation.y += delta * b.rotSpeedY;
-                b.model.rotation.z += delta * b.rotSpeedZ;
-            }
-
-            renderer.render(scene, camera);
+      item.addEventListener("pointerup", function(e){
+        if(!state.dragging) return;
+        state.dragging = false;
+        item.classList.remove("vibe-dragging");
+        state.relaxTimer = window.setTimeout(relaxCloth, 80);
+        if(state.captured && item.hasPointerCapture(e.pointerId)) item.releasePointerCapture(e.pointerId);
+        if(state.moved) item.dataset.vibeMoved = "true";
+        else if(state.clickCellId){
+          openItem(state.clickCellId);
         }
+      });
 
-        animate();
+      item.addEventListener("pointercancel", function(e){
+        state.dragging = false;
+        state.captured = false;
+        item.classList.remove("vibe-dragging");
+        relaxCloth();
+        if(item.hasPointerCapture(e.pointerId)) item.releasePointerCapture(e.pointerId);
+      });
 
-        window.addEventListener('resize', function () {
-            aspect = window.innerWidth / window.innerHeight;
-            camera.left = -frustumSize * aspect / 2;
-            camera.right = frustumSize * aspect / 2;
-            camera.top = frustumSize / 2;
-            camera.bottom = -frustumSize / 2;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
-    </script>
-
-    <script src="https://w.soundcloud.com/player/api.js"></script>
-    <script>
-        const player = document.getElementById('musicPlayer');
-        const playIcon = document.getElementById('playIcon');
-        const playerLabel = document.getElementById('playerLabel');
-        const playerTitle = document.getElementById('playerTitle');
-        const reactiveBlur = document.getElementById('reactiveBlur');
-
-        const widget = SC.Widget(document.getElementById('scWidget'));
-        window._scWidget = widget;
-        let isPlaying = false;
-        let animFrame = null;
-
-        widget.bind(SC.Widget.Events.READY, function () {
-            widget.setVolume(0);
-
-            let hasFadedIn = false;
-            widget.bind(SC.Widget.Events.PLAY, function fadeIn() {
-                if (hasFadedIn) return;
-                hasFadedIn = true;
-                let vol = 0;
-                const fadeInterval = setInterval(function () {
-                    vol += 2;
-                    if (vol >= 10) {
-                        vol = 10;
-                        clearInterval(fadeInterval);
-                    }
-                    widget.setVolume(vol);
-                }, 50);
-            });
-
-            widget.getCurrentSound(function (sound) {
-                if (sound && sound.title) {
-                    const artist = sound.user ? sound.user.username : '';
-                    playerTitle.textContent = artist ? sound.title + ' - ' + artist : sound.title;
-                } else {
-                    playerTitle.textContent = 'aquasine';
-                }
-            });
-        });
-
-        widget.bind(SC.Widget.Events.PLAY, function () {
-            isPlaying = true;
-            playIcon.className = 'icon-stop';
-            playerLabel.textContent = 'Currently playing';
-            reactiveBlur.classList.add('active');
-            startReactiveAnimation();
-        });
-
-        widget.bind(SC.Widget.Events.PAUSE, function () {
-            isPlaying = false;
-            playIcon.className = 'icon-play';
-            playerLabel.textContent = 'Paused';
-            reactiveBlur.classList.remove('active');
-            stopReactiveAnimation();
-        });
-
-        widget.bind(SC.Widget.Events.FINISH, function () {
-            isPlaying = false;
-            playIcon.className = 'icon-play';
-            playerLabel.textContent = 'Click to play';
-            reactiveBlur.classList.remove('active');
-            stopReactiveAnimation();
-        });
-
-        player.addEventListener('click', function () {
-            widget.toggle();
-        });
-
-        function startReactiveAnimation() {
-            const startTime = performance.now();
-
-            function animate() {
-                const t = (performance.now() - startTime) / 1000;
-
-                const wave1 = Math.sin(t * 2.1) * 0.3;
-                const wave2 = Math.sin(t * 3.7 + 1.2) * 0.2;
-                const wave3 = Math.sin(t * 5.3 + 2.8) * 0.15;
-                const wave4 = Math.sin(t * 1.3 + 0.5) * 0.1;
-
-                const combined = 0.45 + wave1 + wave2 + wave3 + wave4;
-                const opacity = Math.max(0.1, Math.min(1, combined));
-
-                reactiveBlur.style.opacity = opacity;
-
-                const scale = 1 + Math.sin(t * 1.7) * 0.08 + Math.sin(t * 2.9 + 1) * 0.05;
-                reactiveBlur.style.transform = 'translateX(-50%) scale(' + scale + ')';
-
-                animFrame = requestAnimationFrame(animate);
-            }
-
-            animate();
+      item.addEventListener("click", function(e){
+        if(!document.body.classList.contains("vibe-mode")) return;
+        if(item.dataset.vibeMoved === "true"){
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          delete item.dataset.vibeMoved;
+          return;
         }
-
-        function stopReactiveAnimation() {
-            if (animFrame) {
-                cancelAnimationFrame(animFrame);
-                animFrame = null;
-            }
+        if(item.querySelector(".cell")){
+          e.preventDefault();
+          e.stopImmediatePropagation();
         }
-    </script>
+      }, true);
+
+      document.addEventListener("vibeexit", function(){
+        state.x = 0;
+        state.y = 0;
+        state.dragging = false;
+        state.moved = false;
+        state.captured = false;
+        state.clickCellId = "";
+        delete item.dataset.vibeMoved;
+        item.classList.remove("vibe-dragging");
+        item.style.removeProperty("--vibe-x");
+        item.style.removeProperty("--vibe-y");
+        item.style.removeProperty("--vibe-skew-x");
+        item.style.removeProperty("--vibe-skew-y");
+        item.style.removeProperty("--vibe-rotate");
+      });
+    });
+  }
+
+  enableVibeDragging(document.querySelectorAll("header.vibe-draggable, footer.vibe-draggable, #musicPlayer.vibe-draggable"));
+
+  function openItem(id){
+    const it = ITEMS.find(function(i){return i.id===id;});
+    if(!it) return;
+    if(itemType(it)==="youtube"){ openModal(it); return; }
+    if(isProductItem(it)){ location.hash = "#/"+id; return; }
+    if(it.url){ window.open(it.url, "_blank", "noopener"); }
+  }
+
+  function showProduct(it){
+    document.getElementById("pImg").innerHTML =
+      it.img ? '<img src="'+escapeHtml(it.img)+'" alt="'+escapeHtml(it.title)+'" draggable="false">' : '<span class="ph">'+escapeHtml(it.title)+'</span>';
+    document.getElementById("pTag").textContent = sectionLabel(it.section);
+    document.getElementById("pTitle").textContent = it.title;
+    document.getElementById("pDesc").textContent = it.desc || "";
+    const btn = document.getElementById("pBtn");
+    btn.href = it.url || "#";
+    btn.textContent = "get it ↗";
+    enableVibeDragging(document.querySelectorAll("#product .vibe-draggable"));
+    document.body.classList.add("view-product");
+    window.scrollTo(0,0);
+  }
+
+  function showGrid(){ document.body.classList.remove("view-product"); }
+
+  function currentProductId(){
+    const m = location.hash.match(/^#\/(.+)$/);
+    return m ? m[1] : "";
+  }
+
+  function moveProduct(delta){
+    if(!document.body.classList.contains("view-product")) return;
+    const products = productItems();
+    const idx = products.findIndex(function(i){return i.id===currentProductId();});
+    if(idx === -1 || products.length < 2) return;
+    const next = products[(idx + delta + products.length) % products.length];
+    location.hash = "#/"+next.id;
+  }
+
+  function router(){
+    const m = location.hash.match(/^#\/(.+)$/);
+    if(m){
+      const it = ITEMS.find(function(i){return i.id===m[1] && isProductItem(i);});
+      if(it){ showProduct(it); return; }
+    }
+    showGrid();
+  }
+  window.addEventListener("hashchange", router);
+  document.getElementById("backBtn").addEventListener("click", function(){ location.hash="#/"; });
+
+  const modal = document.getElementById("modal");
+  const modalDirect = document.getElementById("modalDirect");
+
+  function resetModal(){
+    modal.setAttribute("aria-label", "Tutorial video");
+    modalDirect.style.display = "none";
+    modalDirect.removeAttribute("href");
+  }
+
+  function openModal(it){
+    resetModal();
+    document.getElementById("mTitle").textContent = it.title;
+    document.getElementById("mVideo").innerHTML =
+      '<iframe src="https://www.youtube.com/embed/'+encodeURIComponent(it.youtube || "")+'?autoplay=1&rel=0" '
+      + 'allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>';
+    document.body.classList.add("view-modal");
+  }
+  function closeModal(){
+    resetModal();
+    document.body.classList.remove("view-modal");
+    document.getElementById("mVideo").innerHTML = "";
+  }
+  document.getElementById("modalClose").addEventListener("click", closeModal);
+  modal.addEventListener("click", function(e){ if(e.target===modal) closeModal(); });
+  document.addEventListener("keydown", function(e){
+    if(e.key==="Escape"){
+      closeModal();
+      closeSubscribeModal();
+      return;
+    }
+    if(e.target.closest("input, textarea, select, [contenteditable='true']")) return;
+    if(document.body.classList.contains("view-modal") || document.body.classList.contains("view-subscribe")) return;
+    if(e.key==="ArrowLeft") moveProduct(-1);
+    if(e.key==="ArrowRight") moveProduct(1);
+  });
+
+  const subscribeModal = document.getElementById("subscribeModal");
+  const subscribeForm = document.getElementById("subscribeForm");
+  const subscribeEmail = document.getElementById("subscribeEmail");
+  const subscribeStatus = document.getElementById("subscribeStatus");
+  const gumroadSubscribeFrame = document.getElementById("gumroadSubscribeFrame");
+  let subscribeSubmitted = false;
+
+  function openSubscribeModal(){
+    subscribeStatus.textContent = "";
+    document.body.classList.add("view-subscribe");
+    window.setTimeout(function(){ subscribeEmail.focus(); }, 0);
+  }
+
+  function closeSubscribeModal(){
+    document.body.classList.remove("view-subscribe");
+  }
+
+  document.getElementById("emailList").addEventListener("click", function(e){
+    e.preventDefault();
+    openSubscribeModal();
+  });
+  document.getElementById("subscribeClose").addEventListener("click", closeSubscribeModal);
+  subscribeModal.addEventListener("click", function(e){ if(e.target===subscribeModal) closeSubscribeModal(); });
+  subscribeForm.addEventListener("submit", function(e){
+    if(!subscribeEmail.checkValidity()){
+      e.preventDefault();
+      subscribeStatus.textContent = "Enter a valid email address.";
+      subscribeEmail.focus();
+      return;
+    }
+    subscribeSubmitted = true;
+    subscribeStatus.textContent = "Subscribing...";
+  });
+  gumroadSubscribeFrame.addEventListener("load", function(){
+    if(!subscribeSubmitted) return;
+    subscribeSubmitted = false;
+    subscribeStatus.textContent = "Check your inbox.";
+  });
+
+  const footerAction = document.getElementById("footerAction");
+  const footerLink = document.getElementById("footerLink");
+  let footerPopoverTimer = null;
+
+  footerLink.addEventListener("click", function(e){
+    e.preventDefault();
+    footerAction.classList.add("show-popover");
+    if(footerPopoverTimer) window.clearTimeout(footerPopoverTimer);
+    footerPopoverTimer = window.setTimeout(function(){
+      footerAction.classList.remove("show-popover");
+    }, 2200);
+  });
+
+  function showLoadError(){
+    document.getElementById("grid-root").innerHTML =
+      '<div class="load-error"><strong>Could not load content.yml.</strong>'
+      + '<span>GitHub Pages will load this normally. For local preview, run a small static server instead of opening index.html directly.</span></div>';
+  }
+
+  async function init(){
+    try{
+      const response = await fetch("content.yml", { cache: "no-cache" });
+      if(!response.ok) throw new Error("content.yml returned " + response.status);
+      CONTENT = jsyaml.load(await response.text()) || {};
+      ITEMS = normalizeItems(CONTENT.items);
+      SECTIONS = CONTENT.sections || [];
+      applySiteMeta();
+      renderGrid();
+      router();
+    }catch{
+      showLoadError();
+    }
+  }
+
+  init();
+</script>
 </body>
 </html>

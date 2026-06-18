@@ -1,0 +1,67 @@
+site:
+  title: crinzip
+  wordmark: crin.zip
+  email_list_label: email list
+  email_list_url: https://crin.gumroad.com/subscribe
+  email_list_seller_id: "6298132492501"
+  footer: "made in bratislava, europe"
+  footer_link_label: download all
+
+sections:
+  - id: tools
+    label: tools
+  - id: assets
+    label: assets
+  - id: videos
+    label: videos
+  - id: blog
+    label: blog
+
+items:
+  - section: tools
+    type: product
+    title: Tiny-QR.ccx (WIP)
+    caption: Tiny-QR.ccx (WIP)
+    desc: tiny extension that helps you make QR codes straight in Premiere
+    img: img/tinyqr.png
+    url: https://github.com/crinzip/tiny-qr-pr
+
+  - section: assets
+    type: product
+    title: vhs-overlays.zip
+    caption: vhs-overlays.zip
+    desc: a pack of 4 VHS overlays made from real tapes
+    img: img/vhs-overlays.png
+    url: https://crin.gumroad.com/l/vhs-overlays
+
+  - section: assets
+    type: product
+    title: snow-overlays.zip
+    caption: snow-overlays.zip
+    desc: a pack of 5 snow overlays made in after effects
+    img: img/snow-overlays.png
+    url: https://crin.gumroad.com/l/snow-overlays
+
+  - section: assets
+    type: product
+    title: light-leaks.zip
+    caption: light-leaks.zip
+    desc: a pack of 10 light leaks made with genai
+    img: img/light-leaks.png
+    url: https://crin.gumroad.com/l/light-leaks
+
+  - section: assets
+    type: product
+    title: stream-package.zip
+    caption: stream-package.zip
+    desc: a stream designs package themed for Kick.com
+    img: img/stream-package.png
+    url: https://crin.gumroad.com/l/kickpackage
+
+  - section: assets
+    type: product
+    title: crt-transition.zip
+    caption: crt-transition.zip
+    desc: a CRT-style stinger animation for OBS Studio.
+    img: img/obs-transition.png
+    url: https://crin.gumroad.com/l/crt-transition
