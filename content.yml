@@ -20,8 +20,8 @@ sections:
 items:
   - section: tools
     type: product
-    title: Tiny-QR.ccx (WIP)
-    caption: Tiny-QR.ccx (WIP)
+    title: Tiny-QR.ccx
+    caption: Tiny-QR.ccx
     desc: tiny extension that helps you make QR codes straight in Premiere
     img: img/tinyqr.png
     url: https://github.com/crinzip/tiny-qr-pr
